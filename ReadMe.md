@@ -37,6 +37,7 @@
     $ heroku create
     $ git push heroku master
 	$ heroku config:push
+    (This command push .env to heroku app)
     ```
 	You can get your app's URL.
 
