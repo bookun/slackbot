@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/bookun/slackbot/pr"
 	"github.com/bookun/slackbot/slack"
@@ -84,5 +85,5 @@ func main() {
 	handler := http.HandlerFunc(handle)
 	http.HandleFunc("/commands", userAddHandler)
 	http.Handle("/", Adapt(handler, SetHeader()))
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }

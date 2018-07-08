@@ -5,7 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+
+	"github.com/bookun/slackbot/util"
 )
+
+var utils = &util.Util{}
 
 type Field struct {
 	Title string `json:"title"`
@@ -24,6 +28,7 @@ type Attachment struct {
 	TitleLink  string  `json:"title_link"`
 	Text       string  `json:"text"`
 	Fields     []Field `json:"fields"`
+	Markdown   bool    `json:"markdown"`
 	//ImageURL   string `json:"image_url"`
 	ThumbURL   string `json:"thumb_url"`
 	Footer     string `json:"footer"`
@@ -34,6 +39,7 @@ type Attachment struct {
 type Text struct {
 	Name        string       `json:"username"`
 	Channel     string       `json:"channel"`
+	LinkName    bool         `json:"link_names"`
 	Attachments []Attachment `json:"attachments"`
 }
 
@@ -41,6 +47,7 @@ func (p *PR) MakeJsonMessage(name, channel string) *bytes.Buffer {
 	tp := &Text{}
 	tp.Name = name
 	tp.Channel = channel
+	tp.LinkName = true
 	//tp.Attachments.Fields = make([]struct, 1)
 	attachment := &Attachment{}
 	tp.Attachments = append(tp.Attachments, p.makeAttachment(attachment))
@@ -51,7 +58,8 @@ func (p *PR) makeAttachment(attachment *Attachment) Attachment {
 	sender := p.PullRequest.User
 	reviewer := p.PullRequest.RequestedReviewers[0]
 	title := p.PullRequest.Title
-	attachment.Pretext = fmt.Sprintf("%s -> %s\nPR: %s\n", sender.Login, reviewer.Login, title)
+	log.Printf("translate %s -> %s\n", reviewer.Login, utils.Translate(reviewer.Login))
+	attachment.Pretext = fmt.Sprintf("%s -> %s\nPR: %s\n", sender.Login, utils.Translate(reviewer.Login), title)
 	attachment.Fallback = attachment.Pretext
 	attachment.Color = "good"
 	attachment.AuthorName = sender.Login
@@ -60,11 +68,12 @@ func (p *PR) makeAttachment(attachment *Attachment) Attachment {
 	attachment.Title = title
 	attachment.TitleLink = p.PullRequest.URL
 	attachment.Text = p.PullRequest.Body
+	attachment.Markdown = true
 	//attachment.Fields[0].Title = "assignee"
 	//attachment.Fields[0].Value = sender.Login
 	//attachment.Fields[0].Short = true
 	attachment.Fields = append(attachment.Fields, Field{Title: "assignee", Value: sender.Login, Short: true})
-	attachment.Fields = append(attachment.Fields, Field{Title: "reviewer", Value: reviewer.Login, Short: true})
+	attachment.Fields = append(attachment.Fields, Field{Title: "reviewer", Value: utils.Translate(reviewer.Login), Short: true})
 	attachment.ThumbURL = attachment.AuthorIcon
 	attachment.Footer = "GitHub"
 	attachment.FooterIcon = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7G9JTqB8z1AVU-Lq7xLy1fQ3RMO-Tt6PRplyhaw75XCAnYvAYxg"
