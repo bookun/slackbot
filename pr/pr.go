@@ -2,6 +2,7 @@ package pr
 
 import "time"
 
+// PR struct is for decoding JSON from Github
 type PR struct {
 	Action      string `json:"action"`
 	Number      int    `json:"number"`

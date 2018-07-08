@@ -16,6 +16,7 @@ type Field struct {
 	Short bool   `json:"short"`
 }
 
+// Attachment struct
 type Attachment struct {
 	Fallback   string  `json:"fallback"`
 	Color      string  `json:"color"`
@@ -28,11 +29,10 @@ type Attachment struct {
 	Text       string  `json:"text"`
 	Fields     []Field `json:"fields"`
 	Markdown   bool    `json:"markdown"`
-	//ImageURL   string `json:"image_url"`
-	ThumbURL   string `json:"thumb_url"`
-	Footer     string `json:"footer"`
-	FooterIcon string `json:"footer_icon"`
-	Ts         int64  `json:"ts"`
+	ThumbURL   string  `json:"thumb_url"`
+	Footer     string  `json:"footer"`
+	FooterIcon string  `json:"footer_icon"`
+	Ts         int64   `json:"ts"`
 }
 
 type Text struct {
