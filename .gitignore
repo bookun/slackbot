@@ -13,3 +13,4 @@
 
 .env
 vendor/
+sample_json/
