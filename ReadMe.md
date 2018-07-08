@@ -49,3 +49,19 @@
 	5. Choise "Let me select individual events"
 	6. Check "Pull requests" only.
 
+    Your PR information send to slack !!
+
+5. Opptional) Add a Slash Command
+    1. https://api.slack.com/apps
+    2. Put "Create New App"
+    3. Fill web form
+    4. "Features" > "Slash Commands" in the left navigation bar
+    5. Put "Create New Command"
+    6. Command is "/useradd"
+    7. Request URL is "<Your Heroku App URL>/commands"
+    8. Usage Hint is <GitHub Name> @<Slack Name>
+    9. Put "Save"
+
+    Install your slack app.
+    In the your talkroom, Please input reviewer's information. `/useradd <GitHub Name> @<Slack Name`.
+    You can send notification to reviewer in next your pull request.
