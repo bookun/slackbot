@@ -12,7 +12,6 @@ type Slack struct {
 
 func NewSlack(webhook string) *Slack {
 	slack := &Slack{}
-	//slack.Webhook := "https://hooks.slack.com/services/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"
 	slack.Webhook = webhook
 	return slack
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/bookun/slackbot/pr"
 	"github.com/bookun/slackbot/slack"
 	"github.com/bookun/slackbot/user"
+
+	"github.com/joho/godotenv"
 )
 
 // Adapter is function
@@ -34,6 +36,12 @@ func SetHeader() Adapter {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Not found .env file")
+	}
+	log.Println(os.Getenv("SLACKWEBHOOK"))
+	log.Println(os.Getenv("CHANNEL"))
 	event := r.Header.Get("X-Github-Event")
 	if event == "pull_request" {
 		var requestedPR pr.PR
@@ -42,15 +50,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		if requestedPR.Action == "review_requested" {
-			//fmt.Fprintln(w, requestedPR.PullRequest.URL)
-			//fmt.Fprintln(w, requestedPR.PullRequest.User.Login)
-			//for _, v := range requestedPR.PullRequest.RequestedReviewers {
-			//	fmt.Fprintln(w, v.Login)
-			//}
-			//fmt.Fprintln(w, requestedPR.PullRequest.Title)
-			//fmt.Fprintln(w, requestedPR.PullRequest.Body)
-			message := requestedPR.MakeJsonMessage("PullRequest", "general")
-			slack := slack.NewSlack("https://hooks.slack.com/services/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")
+			message := requestedPR.MakeJsonMessage("PullRequest", os.Getenv("CHANNEL"))
+			slack := slack.NewSlack(os.Getenv("SLACKWEBHOOK"))
 			slack.Send(message)
 		}
 	} else {
