@@ -6,11 +6,13 @@ import (
 	"strings"
 )
 
+// User is used for mapping betweeb GithubName and SlackName
 type User struct {
 	GithubName string
 	SlackName  string
 }
 
+// NewUser function init User
 func NewUser(text string) *User {
 	items := strings.Split(text, " ")
 	user := &User{}
@@ -19,6 +21,7 @@ func NewUser(text string) *User {
 	return user
 }
 
+// Add function adds environment variable
 func (u *User) Add() {
 	u.GithubName = strings.Replace(u.GithubName, "-", "_", -1)
 	log.Printf("gihubname: %s\n", u.GithubName)

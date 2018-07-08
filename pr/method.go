@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/bookun/slackbot/util"
 )
@@ -43,7 +42,7 @@ type Text struct {
 	Attachments []Attachment `json:"attachments"`
 }
 
-func (p *PR) MakeJsonMessage(name, channel string) *bytes.Buffer {
+func (p *PR) MakeJsonMessage(name, channel string) (*bytes.Buffer, error) {
 	tp := &Text{}
 	tp.Name = name
 	tp.Channel = channel
@@ -58,7 +57,6 @@ func (p *PR) makeAttachment(attachment *Attachment) Attachment {
 	sender := p.PullRequest.User
 	reviewer := p.PullRequest.RequestedReviewers[0]
 	title := p.PullRequest.Title
-	log.Printf("translate %s -> %s\n", reviewer.Login, utils.Translate(reviewer.Login))
 	attachment.Pretext = fmt.Sprintf("%s -> %s\nPR: %s\n", sender.Login, utils.Translate(reviewer.Login), title)
 	attachment.Fallback = attachment.Pretext
 	attachment.Color = "good"
@@ -81,11 +79,11 @@ func (p *PR) makeAttachment(attachment *Attachment) Attachment {
 	return *attachment
 }
 
-func (p *PR) jsonEncode(text Text) *bytes.Buffer {
+func (p *PR) jsonEncode(text Text) (*bytes.Buffer, error) {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	if err := enc.Encode(text); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return bytes.NewBuffer(buf.Bytes())
+	return bytes.NewBuffer(buf.Bytes()), nil
 }

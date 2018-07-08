@@ -25,23 +25,22 @@ func Adapt(h http.Handler, adapters ...Adapter) http.Handler {
 	return h
 }
 
-// SetHeader set "content-type" header
-func SetHeader() Adapter {
+// LoadEnv function load .env before handle function
+func LoadEnv() Adapter {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			err := godotenv.Load()
+			if err != nil {
+				log.Println("Not found .env file")
+			}
 			h.ServeHTTP(w, r)
 		})
 	}
 }
 
+// handler handle review requests from Github
 func handle(w http.ResponseWriter, r *http.Request) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Not found .env file")
-	}
-	log.Println(os.Getenv("SLACKWEBHOOK"))
-	log.Println(os.Getenv("CHANNEL"))
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	event := r.Header.Get("X-Github-Event")
 	if event == "pull_request" {
 		var requestedPR pr.PR
@@ -50,29 +49,22 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		if requestedPR.Action == "review_requested" {
-			message := requestedPR.MakeJsonMessage("PullRequest", os.Getenv("CHANNEL"))
+			message, err := requestedPR.MakeJsonMessage("PullRequest", os.Getenv("CHANNEL"))
+			if err != nil {
+				log.Println(err)
+			}
 			slack := slack.NewSlack(os.Getenv("SLACKWEBHOOK"))
-			slack.Send(message)
+			if err = slack.Send(message); err != nil {
+				log.Println(err)
+			}
 		}
 	} else {
 		fmt.Fprintln(w, "not")
 	}
 }
 
+// userAddHandler handle user additional requests using a slash command from Slack
 func userAddHandler(w http.ResponseWriter, r *http.Request) {
-	//token=gIkuvaNzQIHg97ATvDxqgjtO
-	//&team_id=T0001
-	//&team_domain=example
-	//&enterprise_id=E0001
-	//&enterprise_name=Globular%20Construct%20Inc
-	//&channel_id=C2147483705
-	//&channel_name=test
-	//&user_id=U2147483697
-	//&user_name=Steve
-	//&command=/weather
-	//&text=94070
-	//&response_url=https://hooks.slack.com/commands/1234/5678
-	//&trigger_id=13345224609.738474920.8088930838d88f008e0
 	commands := r.FormValue("command")
 	if commands == "/useradd" {
 		//text := r.FormValue("text")
@@ -83,8 +75,8 @@ func userAddHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	handler := http.HandlerFunc(handle)
 	http.HandleFunc("/commands", userAddHandler)
-	http.Handle("/", Adapt(handler, SetHeader()))
+	handler := http.HandlerFunc(handle)
+	http.Handle("/", Adapt(handler, LoadEnv()))
 	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
