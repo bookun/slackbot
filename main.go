@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -38,8 +37,8 @@ func LoadEnv() Adapter {
 	}
 }
 
-// handler handle review requests from Github
-func handle(w http.ResponseWriter, r *http.Request) {
+// requestReviewHandle handle review requests from Github
+func requestReviewHandle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	event := r.Header.Get("X-Github-Event")
 	if event == "pull_request" {
@@ -58,8 +57,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 			}
 		}
-	} else {
-		fmt.Fprintln(w, "not")
 	}
 }
 
@@ -67,8 +64,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 func userAddHandler(w http.ResponseWriter, r *http.Request) {
 	commands := r.FormValue("command")
 	if commands == "/useradd" {
-		//text := r.FormValue("text")
-		//token := r.FormValue("token")
 		user := user.NewUser(r.FormValue("text"))
 		user.Add()
 	}
@@ -76,7 +71,7 @@ func userAddHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/commands", userAddHandler)
-	handler := http.HandlerFunc(handle)
+	handler := http.HandlerFunc(requestReviewHandle)
 	http.Handle("/", Adapt(handler, LoadEnv()))
 	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
