@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bookun/slackbot/pr"
-	"github.com/bookun/slackbot/slack"
-	"github.com/bookun/slackbot/user"
+	"github.com/kutsuzawa/slackbot/pr"
+	"github.com/kutsuzawa/slackbot/slack"
+	"github.com/kutsuzawa/slackbot/user"
 
 	"github.com/joho/godotenv"
 )

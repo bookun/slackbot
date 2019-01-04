@@ -17,8 +17,8 @@
 2. Clone this project
     
     ```
-    $ go get github.com/bookun/slackbot
-    $ cd ${GOPATH}/src/github.com/bookun/slackbot
+    $ go get github.com/kutsuzawa/slackbot
+    $ cd ${GOPATH}/src/github.com/kutsuzawa/slackbot
     ```
 
 3. Prepare .env
