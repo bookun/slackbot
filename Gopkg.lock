@@ -2,14 +2,16 @@
 
 
 [[projects]]
+  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
   name = "github.com/joho/godotenv"
   packages = ["."]
-  revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
-  version = "v1.2.0"
+  pruneopts = "UT"
+  revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "67bc2824bab59ac29fff55f1ff607b1555262763cff04ecc48a3a18c3b458d7d"
+  input-imports = ["github.com/joho/godotenv"]
   solver-name = "gps-cdcl"
   solver-version = 1

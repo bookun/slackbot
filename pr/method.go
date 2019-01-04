@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bookun/slackbot/util"
+	"github.com/kutsuzawa/slackbot/util"
 )
 
 var utils = &util.Util{}
