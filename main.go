@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,12 +12,15 @@ import (
 	"github.com/kutsuzawa/slackbot/user"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-
-	"github.com/joho/godotenv"
 )
 
+type handler struct {
+	slackWebhook string
+	slackChannel string
+}
+
 // requestReviewHandle handle review requests from Github
-func requestReviewHandler(c echo.Context) error {
+func (h *handler) requestReviewHandler(c echo.Context) error {
 	c.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
 	event := c.Request().Header.Get("X-Github-Event")
 	if event == "pull_request" {
@@ -27,12 +31,12 @@ func requestReviewHandler(c echo.Context) error {
 			return err
 		}
 		if requestedPR.Action == "review_requested" {
-			message, err := requestedPR.MakeJsonMessage("PullRequest", os.Getenv("CHANNEL"))
+			message, err := requestedPR.MakeJsonMessage("PullRequest", h.slackChannel)
 			if err != nil {
 				log.Println(err)
 				return err
 			}
-			slack := slack.NewSlack(os.Getenv("SLACKWEBHOOK"))
+			slack := slack.NewSlack(h.slackWebhook)
 			if err = slack.Send(message); err != nil {
 				log.Println(err)
 				return err
@@ -43,7 +47,7 @@ func requestReviewHandler(c echo.Context) error {
 }
 
 // userAddHandler handle user additional requests using a slash command from Slack
-func userAddHandler(c echo.Context) error {
+func (h *handler) userAddHandler(c echo.Context) error {
 	commands := c.Request().FormValue("command")
 	if commands == "/useradd" {
 		user := user.NewUser(c.Request().FormValue("text"))
@@ -52,22 +56,40 @@ func userAddHandler(c echo.Context) error {
 	return c.String(http.StatusOK, "succeed in adding user")
 }
 
-func welcomeHandler(c echo.Context) error {
+func (h *handler) welcomeHandler(c echo.Context) error {
 	return c.String(http.StatusOK, "welcome to our slackbot")
 }
 
+func checkEnv() error {
+	envs := []string{"CHANNEL", "SLACKWEBHOOK", "PORT"}
+	for _, v := range envs {
+		if os.Getenv(v) == "" {
+			err := fmt.Errorf("env variable %s is not defined", v)
+			return err
+		}
+	}
+	return nil
+}
+
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Not found .env file")
+	if err := checkEnv(); err != nil {
+		log.Fatal(err)
+	}
+	handler := &handler{
+		slackWebhook: os.Getenv("SLACKWEBHOOK"),
+		slackChannel: os.Getenv("CHANNEL"),
 	}
 	e := echo.New()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.POST("/commands", userAddHandler)
-	e.POST("/pr", requestReviewHandler)
-	e.GET("/", welcomeHandler)
-
-	e.Logger.Fatal(e.Start(":"+os.Getenv("PORT")))
+	e.POST("/commands", handler.userAddHandler)
+	e.POST("/pr", handler.requestReviewHandler)
+	e.GET("/", handler.welcomeHandler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
