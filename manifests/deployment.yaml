@@ -1,4 +1,3 @@
-#apiVersion: extensions/v1beta1
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,9 +18,15 @@ spec:
         image: us.gcr.io/bookun-221813/slackbot:latest
         env:
         - name: SLACKWEBHOOK
-          value: https://hooks.slack.com/services/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
+          valueFrom:
+            configMapKeyRef:
+              key: slack-webhook
+              name: slackbot
         - name: CHANNEL
-          value: test
+          valueFrom:
+            configMapKeyRef:
+              key: slack-channel
+              name: slackbot
         - name: PORT
           value: "3030"
         - name: nttr-kutuzawa
