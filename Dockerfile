@@ -1,6 +1,8 @@
-FROM golang:1.12beta1-alpine3.8
+#FROM golang:1.12beta1-alpine3.8
+FROM golang:1.11.4-alpine3.8
 
 ENV GO111MODULE on
+ENV CGO_ENABLED 0
 
 ARG pkg=github.com/kutsuzawa/slackbot
 
@@ -14,5 +16,4 @@ RUN set -ex \
       && go build \
       && go install
 
-COPY .env /go
 CMD ["slackbot"]

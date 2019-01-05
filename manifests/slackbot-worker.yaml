@@ -1,0 +1,38 @@
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slackbot-worker
+  labels:
+    app: slackbot
+    tier: worker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: slackbot
+        tier: worker
+    spec:
+      containers:
+      - name: slackbot-app
+        image: us.gcr.io/bookun-221813/slackbot:latest
+        env:
+        - name: SLACKWEBHOOK
+          value: https://hooks.slack.com/services/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
+        - name: CHANNEL
+          value: test
+        - name: PORT
+          value: "3030"
+        - name: nttr-kutuzawa
+          value: bookun
+        - name: tpi-m-hirota
+          value: hirota
+        ports:
+        - name: http-server
+          containerPort: 3030
+  selector:
+    matchLabels:
+      app: slackbot
+      tier: worker
+        
