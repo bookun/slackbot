@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,69 +10,86 @@ import (
 	"github.com/kutsuzawa/slackbot/pr"
 	"github.com/kutsuzawa/slackbot/slack"
 	"github.com/kutsuzawa/slackbot/user"
-
-	"github.com/joho/godotenv"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
-// Adapter is function
-type Adapter func(http.Handler) http.Handler
-
-// Adapt function takes the handler you want to adapt
-func Adapt(h http.Handler, adapters ...Adapter) http.Handler {
-	for _, adapter := range adapters {
-		h = adapter(h)
-	}
-	return h
-}
-
-// LoadEnv function load .env before handle function
-func LoadEnv() Adapter {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			err := godotenv.Load()
-			if err != nil {
-				log.Println("Not found .env file")
-			}
-			h.ServeHTTP(w, r)
-		})
-	}
+type handler struct {
+	slackWebhook string
+	slackChannel string
 }
 
 // requestReviewHandle handle review requests from Github
-func requestReviewHandle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	event := r.Header.Get("X-Github-Event")
+func (h *handler) requestReviewHandler(c echo.Context) error {
+	c.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
+	event := c.Request().Header.Get("X-Github-Event")
 	if event == "pull_request" {
 		var requestedPR pr.PR
-		dec := json.NewDecoder(r.Body)
+		dec := json.NewDecoder(c.Request().Body)
 		if err := dec.Decode(&requestedPR); err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return err
 		}
 		if requestedPR.Action == "review_requested" {
-			message, err := requestedPR.MakeJsonMessage("PullRequest", os.Getenv("CHANNEL"))
+			message, err := requestedPR.MakeJsonMessage("PullRequest", h.slackChannel)
 			if err != nil {
 				log.Println(err)
+				return err
 			}
-			slack := slack.NewSlack(os.Getenv("SLACKWEBHOOK"))
+			slack := slack.NewSlack(h.slackWebhook)
 			if err = slack.Send(message); err != nil {
 				log.Println(err)
+				return err
 			}
 		}
 	}
+	return c.String(http.StatusOK, "succeed in sending PR to slack")
 }
 
 // userAddHandler handle user additional requests using a slash command from Slack
-func userAddHandler(w http.ResponseWriter, r *http.Request) {
-	commands := r.FormValue("command")
+func (h *handler) userAddHandler(c echo.Context) error {
+	commands := c.Request().FormValue("command")
 	if commands == "/useradd" {
-		user := user.NewUser(r.FormValue("text"))
+		user := user.NewUser(c.Request().FormValue("text"))
 		user.Add()
 	}
+	return c.String(http.StatusOK, "succeed in adding user")
+}
+
+func (h *handler) welcomeHandler(c echo.Context) error {
+	return c.String(http.StatusOK, "welcome to our slackbot")
+}
+
+func checkEnv() error {
+	envs := []string{"CHANNEL", "SLACKWEBHOOK", "PORT"}
+	for _, v := range envs {
+		if os.Getenv(v) == "" {
+			err := fmt.Errorf("env variable %s is not defined", v)
+			return err
+		}
+	}
+	return nil
 }
 
 func main() {
-	http.HandleFunc("/commands", userAddHandler)
-	handler := http.HandlerFunc(requestReviewHandle)
-	http.Handle("/", Adapt(handler, LoadEnv()))
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+	if err := checkEnv(); err != nil {
+		log.Fatal(err)
+	}
+	handler := &handler{
+		slackWebhook: os.Getenv("SLACKWEBHOOK"),
+		slackChannel: os.Getenv("CHANNEL"),
+	}
+	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.POST("/commands", handler.userAddHandler)
+	e.POST("/pr", handler.requestReviewHandler)
+	e.GET("/", handler.welcomeHandler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
