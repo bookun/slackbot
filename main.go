@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,8 +24,7 @@ func (h *handler) requestReviewHandler(c echo.Context) error {
 	event := c.Request().Header.Get("X-Github-Event")
 	if event == "pull_request" {
 		var requestedPR pr.PR
-		dec := json.NewDecoder(c.Request().Body)
-		if err := dec.Decode(&requestedPR); err != nil {
+		if err := c.Bind(&requestedPR); err != nil {
 			log.Println(err)
 			return err
 		}
