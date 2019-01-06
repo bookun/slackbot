@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"github.com/kutsuzawa/slackbot/events"
 	"github.com/kutsuzawa/slackbot/lib"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/kutsuzawa/slackbot/handler"
+	"github.com/kutsuzawa/slackbot/models"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/kutsuzawa/slackbot/models"
-	"github.com/kutsuzawa/slackbot/handler"
 )
 
 func healthHandler(c echo.Context) error {
@@ -34,7 +35,9 @@ func main() {
 	}
 	port := os.Getenv("PORT")
 	slack := models.NewSlack(os.Getenv("SLACKWEBHOOK"), os.Getenv("CHANNEL"), os.Getenv("TOKEN"))
-	controller := handler.NewEventController(slack, &lib.Util{})
+	eventMap := make(map[string]handler.Event)
+	eventMap["pull_request"] = &events.PR{}
+	controller := handler.NewEventController(eventMap, slack, &lib.Util{})
 
 	e := echo.New()
 	e.Use(middleware.Logger())

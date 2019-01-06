@@ -9,7 +9,7 @@ import (
 
 // Slack have webhook and channel
 type Slack struct {
-	Channel string
+	channel string
 	webhook string
 	token   string
 }
@@ -17,7 +17,7 @@ type Slack struct {
 // NewSlack init slack
 func NewSlack(webhook, channel, token string) *Slack {
 	return &Slack{
-		Channel: channel,
+		channel: channel,
 		webhook: webhook,
 		token:   token,
 	}
@@ -106,6 +106,10 @@ type usersList struct {
 		Has2Fa            bool   `json:"has_2fa,omitempty"`
 	} `json:"members"`
 	CacheTs int `json:"cache_ts"`
+}
+
+func (s *Slack) GetChannel() string {
+	return s.channel
 }
 
 // Send function send message to talk room in slack

@@ -1,29 +1,34 @@
 package handler
 
 import (
-	"github.com/kutsuzawa/slackbot/events"
+	"net/http"
+
 	"github.com/kutsuzawa/slackbot/lib"
 	"github.com/kutsuzawa/slackbot/models"
 	"github.com/labstack/echo"
-	"net/http"
 )
+
 
 type Event interface {
 	GetSenderAndTargets() (string, []string)
 	MakeMessage(channel string, senderID string, targetIDs []string) (models.Message, error)
 }
 
+type Slack interface {
+	GetIDs([]string) ([]string, error)
+	GetChannel() string
+	Send(message models.Message) error
+}
+
 type EventController struct {
 	eventMap map[string]Event
-	slack *models.Slack
+	slack Slack
 	util *lib.Util
 }
 
-func NewEventController(slack *models.Slack, util *lib.Util) *EventController {
+func NewEventController(eventMap map[string]Event, slack Slack, util *lib.Util) *EventController {
 	return &EventController{
-		eventMap: map[string]Event{
-			"pull_request": &events.PR{},
-		},
+		eventMap: eventMap,
 		slack: slack,
 		util: util,
 	}
@@ -33,17 +38,17 @@ func (e *EventController) EventHandler(c echo.Context) error {
 	eventName := c.Request().Header.Get("X-Github-Event")
 	event := e.eventMap[eventName]
 	if err := c.Bind(event); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	senderID, targetsIDs, err := e.getSlackSenderIDAndTargetIDs(event.GetSenderAndTargets())
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	message, err := event.MakeMessage(e.slack.Channel, senderID, targetsIDs)
+	message, err := event.MakeMessage(e.slack.GetChannel(), senderID, targetsIDs)
 	if err := e.slack.Send(message); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return c.String(http.StatusOK, "succeed at sending to slack")
+	return c.JSON(http.StatusOK, map[string]string{"event": eventName})
 }
 
 func (e *EventController) getSlackSenderIDAndTargetIDs(sender string, targets []string) (string, []string, error) {
