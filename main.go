@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/kutsuzawa/slackbot/events"
-	"github.com/kutsuzawa/slackbot/lib"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/kutsuzawa/slackbot/events"
+	"github.com/kutsuzawa/slackbot/lib"
 
 	"github.com/kutsuzawa/slackbot/handler"
 	"github.com/kutsuzawa/slackbot/models"

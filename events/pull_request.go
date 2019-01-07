@@ -2,8 +2,9 @@ package events
 
 import (
 	"fmt"
-	"github.com/kutsuzawa/slackbot/models"
 	"time"
+
+	"github.com/kutsuzawa/slackbot/models"
 )
 
 // PR struct is for decoding JSON from Github

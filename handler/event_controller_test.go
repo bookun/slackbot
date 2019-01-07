@@ -3,14 +3,15 @@ package handler
 import (
 	"bytes"
 	"fmt"
-	"github.com/kutsuzawa/slackbot/events"
-	"github.com/kutsuzawa/slackbot/lib"
-	"github.com/kutsuzawa/slackbot/models"
-	"github.com/labstack/echo"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kutsuzawa/slackbot/events"
+	"github.com/kutsuzawa/slackbot/lib"
+	"github.com/kutsuzawa/slackbot/models"
+	"github.com/labstack/echo"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -61,36 +62,36 @@ func TestEventController_EventHandler(t *testing.T) {
 	eventMap["mock"] = &MockEvent{}
 	eventMap["pull_request"] = &events.PR{}
 	cases := []struct {
-		name          string
-		filepath string
-		event string
-		controller    *EventController
+		name         string
+		filepath     string
+		event        string
+		controller   *EventController
 		expectedCode int
-		expectedJSON  string
+		expectedJSON string
 	}{
 		{
-			name:          "success",
-			filepath: "../testdata/mock.json",
-			event: "mock",
-			controller:    NewEventController(eventMap, &MockSlack{}, &lib.Util{}),
+			name:         "success",
+			filepath:     "../testdata/mock.json",
+			event:        "mock",
+			controller:   NewEventController(eventMap, &MockSlack{}, &lib.Util{}),
 			expectedCode: http.StatusOK,
-			expectedJSON:  `{"event":"mock"}`,
+			expectedJSON: `{"event":"mock"}`,
 		},
 		{
-			name:          "send error",
-			event: "mock",
-			filepath: "../testdata/mock.json",
-			controller:    NewEventController(eventMap, &MockSlackError{}, &lib.Util{}),
+			name:         "send error",
+			event:        "mock",
+			filepath:     "../testdata/mock.json",
+			controller:   NewEventController(eventMap, &MockSlackError{}, &lib.Util{}),
 			expectedCode: http.StatusInternalServerError,
-			expectedJSON:  `{"error":"send error"}`,
+			expectedJSON: `{"error":"send error"}`,
 		},
 		{
-			name:          "review_request",
-			event: "pull_request",
-			filepath: "../testdata/pull_request/review_requested.json",
-			controller:    NewEventController(eventMap, &MockSlack{}, &lib.Util{}),
+			name:         "review_request",
+			event:        "pull_request",
+			filepath:     "../testdata/pull_request/review_requested.json",
+			controller:   NewEventController(eventMap, &MockSlack{}, &lib.Util{}),
 			expectedCode: http.StatusOK,
-			expectedJSON:  `{"event":"pull_request"}`,
+			expectedJSON: `{"event":"pull_request"}`,
 		},
 	}
 	for _, testCase := range cases {

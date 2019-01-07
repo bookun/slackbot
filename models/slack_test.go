@@ -8,20 +8,20 @@ import (
 
 var (
 	flagGetIDs = true
-	slack = &Slack{}
+	slack      = &Slack{}
 )
 var message = Message{
-	Name: "Pull Request",
-	Channel: "test",
+	Name:     "Pull Request",
+	Channel:  "test",
 	LinkName: true,
 	Attachments: []Attachment{
 		{
 			Pretext:    fmt.Sprintf("%s -> %s\nPR: %s\n", "octocat", "octocat", "new-feature"),
-			Fallback:    fmt.Sprintf("%s -> %s\nPR: %s\n", "octocat", "octocat", "new-feature"),
+			Fallback:   fmt.Sprintf("%s -> %s\nPR: %s\n", "octocat", "octocat", "new-feature"),
 			Color:      "good",
 			AuthorName: "octocat",
 			AuthorIcon: "https://github.com/images/error/octocat_happy.gif",
-			AuthorLink:"https://api.github.com/users/octocat" ,
+			AuthorLink: "https://api.github.com/users/octocat",
 			Title:      "Test of Slackbot",
 			TitleLink:  "https://api.github.com/repos/octocat/Hello-World/pulls/1347",
 			Text:       "Please pull these awesome changes",

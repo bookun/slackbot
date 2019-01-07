@@ -3,25 +3,26 @@ package events
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kutsuzawa/slackbot/models"
 	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/kutsuzawa/slackbot/models"
 )
 
 var expectedMessage = models.Message{
-	Name: "Pull Request",
-	Channel: "test",
+	Name:     "Pull Request",
+	Channel:  "test",
 	LinkName: true,
 	Attachments: []models.Attachment{
 		{
 			Pretext:    fmt.Sprintf("%s -> %s\nPR: %s\n", "octocat", "octocat", "new-feature"),
-			Fallback:    fmt.Sprintf("%s -> %s\nPR: %s\n", "octocat", "octocat", "new-feature"),
+			Fallback:   fmt.Sprintf("%s -> %s\nPR: %s\n", "octocat", "octocat", "new-feature"),
 			Color:      "good",
 			AuthorName: "octocat",
 			AuthorIcon: "https://github.com/images/error/octocat_happy.gif",
-			AuthorLink:"https://api.github.com/users/octocat" ,
+			AuthorLink: "https://api.github.com/users/octocat",
 			Title:      "new-feature",
 			TitleLink:  "https://api.github.com/repos/octocat/Hello-World/pulls/1347",
 			Text:       "Please pull these awesome changes",
@@ -38,24 +39,24 @@ var expectedMessage = models.Message{
 	},
 }
 
-func timeParse(timeStr string) time.Time{
+func timeParse(timeStr string) time.Time {
 	t, _ := time.Parse("2006-01-02T15:04:05Z", timeStr)
 	return t
 }
 
 func TestPR_MakeMessage(t *testing.T) {
 	cases := []struct {
-		name string
-		filepath string
-		pr *PR
-		expectedError error
+		name            string
+		filepath        string
+		pr              *PR
+		expectedError   error
 		expectedMessage models.Message
 	}{
 		{
-			name: "review_request",
-			filepath: "../testdata/pull_request/review_requested.json",
-			pr: &PR{},
-			expectedError: nil,
+			name:            "review_request",
+			filepath:        "../testdata/pull_request/review_requested.json",
+			pr:              &PR{},
+			expectedError:   nil,
 			expectedMessage: expectedMessage,
 		},
 	}
@@ -81,18 +82,18 @@ func TestPR_MakeMessage(t *testing.T) {
 }
 
 func TestPR_GetSenderAndTargets(t *testing.T) {
-	cases := []struct{
-		name string
-		filepath string
-		pr *PR
-		expectedSender string
+	cases := []struct {
+		name              string
+		filepath          string
+		pr                *PR
+		expectedSender    string
 		expectedReviewers []string
 	}{
 		{
-			name: "1 sender 3 reviewers",
-			filepath: "../testdata/pull_request/review_requested.json",
-			pr: &PR{},
-			expectedSender: "octocat",
+			name:              "1 sender 3 reviewers",
+			filepath:          "../testdata/pull_request/review_requested.json",
+			pr:                &PR{},
+			expectedSender:    "octocat",
 			expectedReviewers: []string{"octocat", "hubot", "other_user"},
 		},
 	}

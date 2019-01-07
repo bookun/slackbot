@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-
 type Event interface {
 	GetSenderAndTargets() (string, []string)
 	MakeMessage(channel string, senderID string, targetIDs []string) (models.Message, error)
@@ -22,15 +21,15 @@ type Slack interface {
 
 type EventController struct {
 	eventMap map[string]Event
-	slack Slack
-	util *lib.Util
+	slack    Slack
+	util     *lib.Util
 }
 
 func NewEventController(eventMap map[string]Event, slack Slack, util *lib.Util) *EventController {
 	return &EventController{
 		eventMap: eventMap,
-		slack: slack,
-		util: util,
+		slack:    slack,
+		util:     util,
 	}
 }
 
