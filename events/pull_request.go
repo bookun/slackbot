@@ -1,6 +1,11 @@
-package pr
+package events
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"github.com/kutsuzawa/slackbot/models"
+)
 
 // PR struct is for decoding JSON from Github
 type PR struct {
@@ -38,33 +43,14 @@ type PR struct {
 			Type              string `json:"type"`
 			SiteAdmin         bool   `json:"site_admin"`
 		} `json:"user"`
-		Body           string      `json:"body"`
-		CreatedAt      time.Time   `json:"created_at"`
-		UpdatedAt      time.Time   `json:"updated_at"`
-		ClosedAt       interface{} `json:"closed_at"`
-		MergedAt       interface{} `json:"merged_at"`
-		MergeCommitSha interface{} `json:"merge_commit_sha"`
-		Assignee       interface{} `json:"assignee"`
-		Assignees      []struct {
-			Login             string `json:"login"`
-			ID                int    `json:"id"`
-			NodeID            string `json:"node_id"`
-			AvatarURL         string `json:"avatar_url"`
-			GravatarID        string `json:"gravatar_id"`
-			URL               string `json:"url"`
-			HTMLURL           string `json:"html_url"`
-			FollowersURL      string `json:"followers_url"`
-			FollowingURL      string `json:"following_url"`
-			GistsURL          string `json:"gists_url"`
-			StarredURL        string `json:"starred_url"`
-			SubscriptionsURL  string `json:"subscriptions_url"`
-			OrganizationsURL  string `json:"organizations_url"`
-			ReposURL          string `json:"repos_url"`
-			EventsURL         string `json:"events_url"`
-			ReceivedEventsURL string `json:"received_events_url"`
-			Type              string `json:"type"`
-			SiteAdmin         bool   `json:"site_admin"`
-		} `json:"assignees"`
+		Body               string        `json:"body"`
+		CreatedAt          time.Time     `json:"created_at"`
+		UpdatedAt          time.Time     `json:"updated_at"`
+		ClosedAt           interface{}   `json:"closed_at"`
+		MergedAt           interface{}   `json:"merged_at"`
+		MergeCommitSha     interface{}   `json:"merge_commit_sha"`
+		Assignee           interface{}   `json:"assignee"`
+		Assignees          []interface{} `json:"assignees"`
 		RequestedReviewers []struct {
 			Login             string `json:"login"`
 			ID                int    `json:"id"`
@@ -516,4 +502,54 @@ type PR struct {
 		Type              string `json:"type"`
 		SiteAdmin         bool   `json:"site_admin"`
 	} `json:"sender"`
+}
+
+func (p *PR) GetSenderAndTargets() (string, []string) {
+	var reviewers []string
+	for _, reviewer := range p.PullRequest.RequestedReviewers {
+		reviewers = append(reviewers, reviewer.Login)
+	}
+	return p.PullRequest.User.Login, reviewers
+}
+
+func (p *PR) MakeMessage(channel string, senderID string, reviewerIDs []string) (models.Message, error) {
+	if p.Action == "review_requested" {
+		sender := p.PullRequest.User
+		reviewer := p.PullRequest.RequestedReviewers[0]
+		title := p.PullRequest.Title
+		senderID = fmt.Sprintf("<@%s>", senderID)
+		reviewerIDsStr := ""
+		for _, reviewerID := range reviewerIDs {
+			reviewerIDsStr += fmt.Sprintf("<@%s>\n", reviewerID)
+		}
+		return models.Message{
+			Name:     "Pull Request",
+			Channel:  channel,
+			LinkName: true,
+			Attachments: []models.Attachment{
+				{
+					Pretext:    fmt.Sprintf("%s -> %s\nPR: %s\n", sender.Login, reviewer.Login, title),
+					Fallback:   fmt.Sprintf("%s -> %s\nPR: %s\n", sender.Login, reviewer.Login, title),
+					Color:      "good",
+					AuthorName: sender.Login,
+					AuthorLink: sender.URL,
+					AuthorIcon: sender.AvatarURL,
+					Title:      title,
+					TitleLink:  p.PullRequest.URL,
+					Text:       p.PullRequest.Body,
+					Markdown:   true,
+					Fields: []models.Field{
+						{Title: "assignee", Value: senderID, Short: true},
+						{Title: "reviewer", Value: reviewerIDsStr, Short: true},
+					},
+					ThumbURL:   sender.AvatarURL,
+					Footer:     "GitHub",
+					FooterIcon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7G9JTqB8z1AVU-Lq7xLy1fQ3RMO-Tt6PRplyhaw75XCAnYvAYxg",
+					Ts:         p.PullRequest.UpdatedAt.Unix(),
+				},
+			},
+		}, nil
+	}
+	err := fmt.Errorf("can not treat this action: %s", p.Action)
+	return models.Message{}, err
 }
