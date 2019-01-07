@@ -35,7 +35,7 @@ jobs:
     on_success:
       put: pr
       params:
-        path: repo
+        path: pr
         status: success
     on_failure:
       put: pr
