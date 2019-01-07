@@ -31,7 +31,7 @@ jobs:
   - task: unit-test
     file: pr/ci/tasks/unit-test.yml
     input_mapping:
-      pr: repo
+      repo: pr
     on_success:
       put: pr
       params:
