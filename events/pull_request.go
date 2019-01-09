@@ -535,7 +535,7 @@ func (p *PR) MakeMessage(channel string, senderID string, reviewerIDs []string) 
 					AuthorLink: sender.URL,
 					AuthorIcon: sender.AvatarURL,
 					Title:      title,
-					TitleLink:  p.PullRequest.URL,
+					TitleLink:  p.PullRequest.HTMLURL,
 					Text:       p.PullRequest.Body,
 					Markdown:   true,
 					Fields: []models.Field{

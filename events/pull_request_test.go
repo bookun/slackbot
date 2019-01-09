@@ -24,7 +24,7 @@ var expectedMessage = models.Message{
 			AuthorIcon: "https://github.com/images/error/octocat_happy.gif",
 			AuthorLink: "https://api.github.com/users/octocat",
 			Title:      "new-feature",
-			TitleLink:  "https://api.github.com/repos/octocat/Hello-World/pulls/1347",
+			TitleLink:  "https://github.com/octocat/Hello-World/pull/1347",
 			Text:       "Please pull these awesome changes",
 			Markdown:   true,
 			Fields: []models.Field{
