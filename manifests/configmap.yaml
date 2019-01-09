@@ -6,5 +6,5 @@ metadata:
     app: slackbot
     tier: worker
 data:
- slack-webhook: https://hooks.slack.com/services/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
- slack-channel: pullrequests
+ slack-webhook: https://hooks.slack.com/services/foo/baa
+ slack-channel: general
