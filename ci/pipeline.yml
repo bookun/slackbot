@@ -25,6 +25,12 @@ resources:
   type: k8s
   source:
     kubeconfig: ((kubeconfig))
+- name: app-image
+  type: docker-image
+  source:
+    repository: cappyzawa/slackbot
+    username: ((docker-username))
+    password: ((docker-password))
 
 jobs:
 - name: test-pr
@@ -59,6 +65,9 @@ jobs:
     trigger: true
   - task: unit-test
     file: repo/ci/tasks/unit-test.yml
+  - put: app-image
+    params:
+      build: repo
 
 - name: deploy
   build_logs_to_retain: 10
