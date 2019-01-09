@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: slackbot-app
-        image: us.gcr.io/bookun-221813/slackbot:latest
+        image: cappyzawa/slackbot:latest
         env:
         - name: SLACKWEBHOOK
           valueFrom:
