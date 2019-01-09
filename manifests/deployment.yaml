@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: slackbot-app
-        image: us.gcr.io/bookun-221813/slackbot:latest
+        image: cappyzawa/slackbot:latest
         env:
         - name: SLACKWEBHOOK
           valueFrom:
@@ -29,10 +29,15 @@ spec:
               name: slackbot
         - name: PORT
           value: "3030"
-        - name: nttr-kutuzawa
+        - name: bookun
           value: bookun
-        - name: tpi-m-hirota
-          value: hirota
+        - name: cappyzawa
+          value: cappyzawa
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: slack-token
+              name: slackbot
         ports:
         - name: http-server
           containerPort: 3030

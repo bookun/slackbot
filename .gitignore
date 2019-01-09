@@ -14,3 +14,5 @@
 .env
 vendor/
 sample_json/
+
+ci/creds.yml
