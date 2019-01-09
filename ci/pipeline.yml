@@ -3,6 +3,11 @@ resource_types:
   type: docker-image
   source:
     repository: teliaoss/github-pr-resource
+- name: k8s
+  type: docker-image
+  source:
+    repository: zlabjp/kubernetes-resource
+    tag: "1.12"
 
 resources:
 - name: pr
@@ -16,6 +21,10 @@ resources:
   webhook_token: ((webhook-token))
   source:
     uri: https://github.com/kutsuzawa/slackbot
+- name: k8s-prod
+  type: k8s
+  source:
+    kubeconfig: ((kubeconfig))
 
 jobs:
 - name: test-pr
@@ -51,3 +60,14 @@ jobs:
   - task: unit-test
     file: repo/ci/tasks/unit-test.yml
 
+- name: deploy
+  build_logs_to_retain: 10
+  plan:
+  - get: repo
+    trigger: true
+    passed:
+      - test-master
+  - put: k8s-prod
+    params:
+      kubectl: apply -f repo/manifests
+      wait_until_ready: 0
