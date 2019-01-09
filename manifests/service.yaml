@@ -11,8 +11,10 @@ spec:
   ports:
   - port: 80
     targetPort: http-server
+    name: http-server
   - port: 6060
     targetPort: debug-port
+    name: debug-port
   selector:
     app: slackbot
     tier: worker
