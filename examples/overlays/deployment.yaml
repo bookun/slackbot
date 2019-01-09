@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slackbot-worker
+  labels:
+    app: slackbot
+    tier: worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: slackbot-app
+          env:
+          - name: bookun
+            value: kutsuzawa2851
+          - name: cappyzawa
+            value: zawamaru
+  selector:
+    matchLabels:
+      app: slackbot
+      tier: worker

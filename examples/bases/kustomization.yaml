@@ -1,0 +1,4 @@
+resources:
+  - ../../manifests/deployment.yaml
+  - ../../manifests/configmap.yaml
+  - ../../manifests/service.yaml
