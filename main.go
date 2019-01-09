@@ -52,7 +52,7 @@ func main() {
 	go func() {
 		e.Logger.Print(http.ListenAndServe(fmt.Sprintf(":%s", debugPort), nil))
 	}()
-	fmt.Printf("start")
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3030"
