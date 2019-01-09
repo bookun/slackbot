@@ -33,9 +33,9 @@ spec:
               key: slack-token
               name: slackbot
         - name: bookun
-          value: bookun
+          value: kutsuzawa2851
         - name: cappyzawa
-          value: cappyzawa
+          value: zawamaru
         ports:
         - name: http-server
           containerPort: 3030
