@@ -21,7 +21,6 @@ resources:
   webhook_token: ((webhook-token))
   source:
     uri: https://github.com/kutsuzawa/slackbot
-    branch: feature/cd
 - name: k8s-prod
   type: k8s
   source:
