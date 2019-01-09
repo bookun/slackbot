@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
+set -ex
+
 go get sigs.k8s.io/kustomize
-kustomize build ./examples/overlays > ../out/manifest.yaml
+kustomize build repo/examples/overlays > out/manifest.yaml
