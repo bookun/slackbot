@@ -80,5 +80,5 @@ jobs:
     file: repo/ci/tasks/gen-manifest.yml
   - put: k8s-prod
     params:
-      kubectl: apply -f out/manifests.yaml
+      kubectl: apply -f out/manifest.yaml
       wait_until_ready: 0
