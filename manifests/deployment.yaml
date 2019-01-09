@@ -27,20 +27,20 @@ spec:
             configMapKeyRef:
               key: slack-channel
               name: slackbot
-        - name: PORT
-          value: "3030"
-        - name: bookun
-          value: bookun
-        - name: cappyzawa
-          value: cappyzawa
         - name: TOKEN
           valueFrom:
             secretKeyRef:
               key: slack-token
               name: slackbot
+        - name: bookun
+          value: bookun
+        - name: cappyzawa
+          value: cappyzawa
         ports:
         - name: http-server
           containerPort: 3030
+        - name: debug-port
+          containerPort: 6060
   selector:
     matchLabels:
       app: slackbot
