@@ -7,9 +7,12 @@ metadata:
     tier: worker
 spec:
   type: LoadBalancer
+  loadBalancerIP: 104.154.157.139
   ports:
   - port: 80
     targetPort: http-server
+  - port: 6060
+    targetPort: debug-port
   selector:
     app: slackbot
     tier: worker
